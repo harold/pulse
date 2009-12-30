@@ -1,4 +1,8 @@
 %html
 	%head
-		%title Yo, sup?
-	%body Hello World!
+		%title Pulse, sup?
+	%body
+		%h1 Pulse
+		%ul
+			- @questions.each do |q| 
+				%li= q[:text]
