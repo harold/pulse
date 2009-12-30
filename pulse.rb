@@ -2,14 +2,16 @@ require 'rubygems'
 require 'sinatra'
 require 'sequel'
 
-get '/?' do
+configure do
 	DB = Sequel.connect( ENV['DATABASE_URL'] || 'sqlite://pulse.db' )
+end
+
+get '/?' do
 	@questions = DB[:questions]
 	haml :index
 end
 
 get '/addquestion/:text' do
-	DB = Sequel.connect( ENV['DATABASE_URL'] || 'sqlite://pulse.db' )
 	questions = DB[:questions]
 	questions.insert(:text => params[:text] )
 	redirect '/'
