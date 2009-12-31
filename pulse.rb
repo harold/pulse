@@ -21,7 +21,7 @@ before do
 	end
 	
 	path = request.path_info
-	unless path[/login|signup/i] or path[/(ico|css|js)$/]
+	unless path[/login|signup/i] or path[/(ico|css|js|png)$/]
 		unless @user
 			redirect '/login'
 		end
