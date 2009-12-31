@@ -1,2 +1,2 @@
 rack-flash
-sequel
+sequel --version '>= 3.0.0'
