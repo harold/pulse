@@ -81,7 +81,7 @@ get '/?' do
 	@questions = DB[:questions]
 	@values = {}
 	@questions.each do |q|
-		@values[q[:id]] = DB[:answers].filter(:user_id=>@user[:id], :question_id=>q[:id]).order(:epoch).select(:value).map(:value)
+		@values[q[:id]] = DB[:answers].filter(:user_id=>@user[:id], :question_id=>q[:id]).order(:epoch).select(:epoch,:value).map{ |a| a.values_at(:epoch,:value) }
 	end
 	@custom_js = "/index.js"
 	haml :index
@@ -102,9 +102,9 @@ post '/answer/?' do
 		:value=>value,
 		:epoch=>Time.now.to_i)
 	
-	answers = DB[:answers].filter(:user_id=>@user[:id], :question_id=>question_id).order(:epoch).select(:value)
+	answers = DB[:answers].filter(:user_id=>@user[:id], :question_id=>question_id).order(:epoch).select(:epoch,:value)
 	
-	"{values:#{answers.map(:value).inspect}}"
+	"{values:#{answers.map{|a| a.values_at(:epoch,:value)}.inspect}}"
 end
 
 post '/detaildata/?' do
