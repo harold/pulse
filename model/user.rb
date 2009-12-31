@@ -9,6 +9,6 @@ class User < Sequel::Model
 	end
 	
 	def hidden_questions
-		Question.filter( :id=>question_prefs_dataset.filter{ priority < 0 }.select(:question_id) )
+		Question.filter( :id=>question_prefs_dataset.filter( :priority < 0 ).select(:question_id) )
 	end
 end
