@@ -1,16 +1,18 @@
 %p= @user[:email]
 
-- @questions.each do |q| 
-	%p.question-text
-		:escaped
-			#{q[:text]}
-		%a{:href=>"/detail/#{q[:id]}"} [detail]
-	%p.answer-radios
-		- (1..5).each do |i|
-			%label
-				%input{:type=>"radio",:value=>"#{i}",:name=>"q#{q[:id]}"}>
-				#{i}
-	%div{:id=>"graph-q#{q[:id]}",:class=>"graph"} #{@values[q[:id]].map{ |p| p.join(':') }.join(",")}
+- @questions.each do |q|
+	%div.question
+		%p.question-text
+			:escaped
+				#{q[:text]}
+			%a{:href=>"/detail/#{q[:id]}"} [detail]
+			%a{:href=>"/hide/#{q[:id]}",:class=>'hide'} [hide]
+		%p.answer-radios
+			- (1..5).each do |i|
+				%label
+					%input{:type=>"radio",:value=>"#{i}",:name=>"q#{q[:id]}"}>
+					#{i}
+		%div{:id=>"graph-q#{q[:id]}",:class=>"graph"} #{@values[q[:id]].map{ |p| p.join(":") }.join(",")}
 		
 %form{:action=>"/addquestion",:method=>"post"}
 	%textarea{:name=>"text"}

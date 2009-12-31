@@ -9,4 +9,9 @@ jQuery(function($){
 	});
 	
 	$(".graph").sparkline('html',theChartOptions);
+	$("a.hide").click(function(evt){
+		var theQuestionWrapper = $(this.parents('.question'));
+		$.post(this.href,function(){ theQuestionWrapper.remove(); });
+		return false;
+	});
 });

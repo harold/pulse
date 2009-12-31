@@ -1,8 +1,11 @@
 require 'rubygems'
 require 'sinatra'
+require 'haml'
+require 'sass'
 require 'sequel'
 require 'digest/sha1'
 require 'rack-flash'
+require 'logger'
 
 enable :sessions
 use Rack::Flash
@@ -11,17 +14,20 @@ COOKIE_NAME = "pulse-login"
 
 configure do
 	DB = Sequel.connect( ENV['DATABASE_URL'] || 'sqlite://pulse.db' )
+	DB.logger = Logger.new STDOUT
+	require "model/user"
+	require "model/question"
+	require "model/answer"
 end
 
 before do
-	cookie = request.cookies[COOKIE_NAME]
-	if cookie
-		email, password = cookie.split("::")
-		@user = DB[:users][:email=>email, :password=>password]
-	end
-	
 	path = request.path_info
 	unless path[/login|signup/i] or path[/(ico|css|js|png)$/]
+		cookie = request.cookies[COOKIE_NAME]
+		if cookie
+			email, password = cookie.split("::")
+			@user = User[:email=>email, :password=>password]
+		end
 		unless @user
 			redirect '/login'
 		end
@@ -35,7 +41,7 @@ end
 post '/login/?' do
 	email    = params[:email]
 	password = hash_password( params[:password])
-	@user    = DB[:users][:email=>email, :password=>password]
+	@user    = User[:email=>email, :password=>password]
 	if @user
 		set_cookie(email,password)
 		redirect '/'
@@ -56,14 +62,14 @@ end
 
 post '/signup/?' do
 	email    = params[:email]
-	password = hash_password( params[:password])
-	@user = DB[:users][:email=>email]
+	password = hash_password( params[:password] )
+	@user = User[:email=>email]
 	
 	if @user
 		redirect '/'
 	else
-		DB[:users].insert({:email=>email,:password=>password})
-		@user = DB[:users][:email=>email, :password=>password]
+		User.create(:email=>email,:password=>password)
+		@user = User[:email=>email, :password=>password]
 		set_cookie(email,password)
 		redirect '/'
 	end
@@ -78,53 +84,60 @@ get '/shared.css' do
 end
 
 get '/?' do
-	@questions = DB[:questions]
+	@questions = @user.visible_questions
 	@values = {}
-	@questions.each do |q|
-		@values[q[:id]] = DB[:answers].filter(:user_id=>@user[:id], :question_id=>q[:id]).order(:epoch).select(:epoch,:value).map{ |a| a.values_at(:epoch,:value) }
-	end
+	@questions.each{ |q| @values[q.pk] = q.timestamped_answers(@user.pk) }
 	@custom_js = "/index.js"
 	haml :index
 end
 
 post '/addquestion/?' do
-	questions = DB[:questions]
-	questions.insert(:text=>params[:text],:user_id=>@user[:id])
+	Question.create( :text=>params[:text], :user_id=>@user.pk )
 	redirect '/'
 end
 
 post '/answer/?' do
 	value = params[:value].to_i
 	question_id = params[:question_id][1..-1].to_i
-	DB[:answers].insert(
-		:user_id=>@user[:id],
+	Answer.create(
+		:user_id=>@user.pk,
 		:question_id=>question_id,
 		:value=>value,
 		:epoch=>Time.now.to_i)
+	answers = Question[question_id].timestamped_answers(@user.pk)
 	
-	answers = DB[:answers].filter(:user_id=>@user[:id], :question_id=>question_id).order(:epoch).select(:epoch,:value)
-	
-	"{values:#{answers.map{|a| a.values_at(:epoch,:value)}.inspect}}"
+	"{values:#{answers.inspect}}"
 end
 
 post '/detaildata/?' do
 	question_id = params[:question_id].to_i
-	answers = DB[:answers].filter(:user_id=>@user[:id], :question_id=>question_id).order(:epoch).all
+	answers = Question[question_id].timestamped_answers(@user.pk)
 	
-	pairs = []
-	answers.each do |a|
-		pairs << [a[:epoch],a[:value]]
-	end
-
-	"{values:#{pairs.inspect}}"
+	"{values:#{answers.inspect}}"
 end
 
 get "/detail/:question_id" do
-	question_id = params[:question_id]
-	@question = DB[:questions].filter(:id=>question_id.to_i).first
+	question_id = params[:question_id].to_i
+	@question = Question[question_id]
 	@custom_js = "/detail.js"
 	haml :detail
 end
+
+# This action is a fallback for the JS-disabled
+get "/hide/:question_id" do
+	question_id = params[:question_id].to_i
+	pref = QuestionPref.find_or_create( :question_id=>question_id, :user_id=>@user.pk )
+	pref.update( :priority=>-1 )
+	redirect '/'
+end
+
+post "/hide/:question_id" do
+	question_id = params[:question_id].to_i
+	pref = QuestionPref.find_or_create( :question_id=>question_id, :user_id=>@user.pk )
+	pref.update( :priority=>-1 )
+	"OK"
+end
+
 
 helpers do
 	def hash_password( password )
