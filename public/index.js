@@ -6,4 +6,6 @@ jQuery(function($){
 				$("#graph-"+theName).sparkline(data.values,{chartRangeMin:1, chartRangeMax:5});
 			},"json");
 	});
+	
+	$(".graph").sparkline('html',{chartRangeMin:1, chartRangeMax:5});
 });
