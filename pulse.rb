@@ -2,8 +2,10 @@ require 'rubygems'
 require 'sinatra'
 require 'sequel'
 require 'digest/sha1'
+require 'rack-flash'
 
 enable :sessions
+use Rack::Flash
 
 COOKIE_NAME = "pulse-login"
 
@@ -19,9 +21,10 @@ before do
 	end
 	
 	path = request.path_info
-	#https://sinatra.lighthouseapp.com/projects/9779/tickets/278-before-filters-run-before-static-files-get-served
-	unless path[/login|signup/i] or path[/(ico|css|js)$/] #TODO: Don't get hosed when integrating sass
-		redirect '/login' unless @user
+	unless path[/login|signup/i] or path[/(ico|css|js)$/]
+		unless @user
+			redirect '/login'
+		end
 	end
 end
 
@@ -32,11 +35,12 @@ end
 post '/login/?' do
 	email    = params[:email]
 	password = hash_password( params[:password])
-	@user = DB[:users][:email=>email, :password=>password]
+	@user    = DB[:users][:email=>email, :password=>password]
 	if @user
 		set_cookie(email,password)
 		redirect '/'
 	else
+		flash[:notice] = "Login failed - try again"
 		redirect '/login'
 	end
 end
