@@ -1,6 +1,11 @@
 %html
 	%head
 		%meta{:name=>'viewport', :content=>'width = device-width'}
+		%link{:type=>'text/css', :rel=>'stylesheet', :href=>'/shared.css'}
+		%script{:type=>'text/javascript', :src=>'jquery-1.3.2.min.js'}
+		%script{:type=>'text/javascript', :src=>'jquery.sparkline.min.js'}
+		- if @custom_js
+			%script{:type=>'text/javascript', :src=>@custom_js}
 		%title Pulse, sup?
 	%body
 		%h1 Pulse

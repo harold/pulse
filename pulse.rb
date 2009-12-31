@@ -45,7 +45,12 @@ get '/login/?' do
 	haml :login
 end
 
-post '/signup' do
+get '/logout/?' do
+	set_cookie('','')
+	redirect '/'
+end
+
+post '/signup/?' do
 	email    = params[:email]
 	password = hash_password( params[:password])
 	@user = DB[:users][:email=>email]
@@ -60,19 +65,38 @@ post '/signup' do
 	end
 end
 
-get '/signup' do
+get '/signup/?' do
 	haml :signup
+end
+
+get '/shared.css' do
+	sass :shared
 end
 
 get '/?' do
 	@questions = DB[:questions]
+	@custom_js = "index.js"
 	haml :index
 end
 
-get '/addquestion/:text' do
+post '/addquestion/?' do
 	questions = DB[:questions]
-	questions.insert(:text => params[:text] )
+	questions.insert(:text=>params[:text],:user_id=>@user[:id])
 	redirect '/'
+end
+
+post '/answer/?' do
+	value = params[:value].to_i
+	question_id = params[:question_id][1..-1].to_i
+	DB[:answers].insert(
+		:user_id=>@user[:id],
+		:question_id=>question_id,
+		:value=>value,
+		:epoch=>Time.now.to_i)
+	
+	answers = DB[:answers].filter(:user_id=>@user[:id], :question_id=>question_id).order(:epoch).select(:value)
+	
+	"{values:#{answers.map(:value).inspect}}"
 end
 
 helpers do

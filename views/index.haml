@@ -1,4 +1,17 @@
-%ul
-	- @questions.each do |q| 
-		%li= q[:text]
-= @user[:email]
+%p= @user[:email]
+
+- @questions.each do |q| 
+	%p.question-text= q[:text]
+	%p.answer-radios
+		- (1..5).each do |i|
+			%label
+				%input{:type=>"radio",:value=>"#{i}",:name=>"q#{q[:id]}"}>
+				#{i}
+	%div{:id=>"graph-q#{q[:id]}"}
+		
+%form{:action=>"/addquestion",:method=>"post"}
+	%textarea{:name=>"text"}
+	%br
+	%button{:type=>"submit"} Add Question
+	
+%a{:href=>"/logout"} Logout!

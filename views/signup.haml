@@ -1,8 +1,16 @@
+%h2 Sign Up
 %form{:action=>"signup",:method=>"post"}
-	%label
-		Email: 
-		%input{:type=>"text",:name=>"email"}
-	%label
-		Password:
-		%input{:type=>"password",:name=>"password"}
-	%button{:type=>"submit"} Sign Up!
+	%table
+		%tr
+			%td Email:
+			%td
+				%input{:type=>"text",:name=>"email"}
+		%tr
+			%td Password:
+			%td
+				%input{:type=>"password",:name=>"password"}
+		%tr
+			%td
+			%td
+				%button{:type=>"submit"} Sign Up
+
