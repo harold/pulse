@@ -1,7 +1,9 @@
 %p= @user[:email]
 
 - @questions.each do |q| 
-	%p.question-text= q[:text]
+	%p.question-text
+		= q[:text]
+		%a{:href=>"/detail/#{q[:id]}"} [detail]
 	%p.answer-radios
 		- (1..5).each do |i|
 			%label

@@ -83,7 +83,7 @@ get '/?' do
 	@questions.each do |q|
 		@values[q[:id]] = DB[:answers].filter(:user_id=>@user[:id], :question_id=>q[:id]).order(:epoch).select(:value).map(:value)
 	end
-	@custom_js = "index.js"
+	@custom_js = "/index.js"
 	haml :index
 end
 
@@ -105,6 +105,25 @@ post '/answer/?' do
 	answers = DB[:answers].filter(:user_id=>@user[:id], :question_id=>question_id).order(:epoch).select(:value)
 	
 	"{values:#{answers.map(:value).inspect}}"
+end
+
+post '/detaildata/?' do
+	question_id = params[:question_id].to_i
+	answers = DB[:answers].filter(:user_id=>@user[:id], :question_id=>question_id).order(:epoch).all
+	
+	pairs = []
+	answers.each do |a|
+		pairs << [a[:epoch],a[:value]]
+	end
+
+	"{values:#{pairs.inspect}}"
+end
+
+get "/detail/:question_id" do
+	question_id = params[:question_id]
+	@question = DB[:questions].filter(:id=>question_id.to_i).first
+	@custom_js = "/detail.js"
+	haml :detail
 end
 
 helpers do
