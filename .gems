@@ -1,1 +1,2 @@
 rack-flash
+sequel --version 3.7.0
