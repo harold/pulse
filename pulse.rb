@@ -14,7 +14,7 @@ COOKIE_NAME = "pulse-login"
 
 configure do
 	DB = Sequel.connect( ENV['DATABASE_URL'] || 'sqlite://pulse.db' )
-	DB.logger = Logger.new STDOUT
+	#DB.logger = Logger.new STDOUT
 	require "model/user"
 	require "model/question"
 	require "model/answer"
@@ -99,7 +99,7 @@ end
 post '/answer/?' do
 	value = params[:value].to_i
 	question_id = params[:question_id][1..-1].to_i
-	Answer.create(
+	Answer.update_or_create(
 		:user_id=>@user.pk,
 		:question_id=>question_id,
 		:value=>value,
