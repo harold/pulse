@@ -1,4 +1,6 @@
-%p#user-id= @user[:email]
+%p#user-id
+	= @user[:email]
+	%a{:href=>"/logout"} [logout]
 
 .questions
 	- @questions.sort_by{ |q| q.hidden_for?(@user.id) ? 1 : 0 }.each do |q|
@@ -23,4 +25,4 @@
 	%br
 	%button{:type=>"submit"} Add Question
 
-%a{:href=>"/logout"} Logout!
+
