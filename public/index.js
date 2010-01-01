@@ -12,12 +12,6 @@ jQuery(function($){
 		location = '/detail/'+$(this).parents('.question').attr('id');
 	});
 	
-	$("a.hide").click(function(evt){
-		var theQuestionWrapper = $(this.parents('.question'));
-		$.post(this.href,function(){ theQuestionWrapper.remove(); });
-		return false;
-	});
-	
 	var theUpdateButtonForQuestion = function(question){
 		question.find('.showhide').html( question.hasClass('hidden') ? 'show' : 'hide' );
 	};
