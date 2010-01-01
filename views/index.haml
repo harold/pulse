@@ -1,4 +1,4 @@
-%p= @user[:email]
+%p#user-id= @user[:email]
 
 - @questions.each do |q|
 	%div.question
@@ -13,10 +13,10 @@
 					%input{:type=>"radio",:value=>"#{i}",:name=>"q#{q[:id]}"}>
 					#{i}
 		%div{:id=>"graph-q#{q[:id]}",:class=>"graph"} #{@values[q[:id]].map{ |p| p.join(":") }.join(",")}
-		
+
 %form{:action=>"/addquestion",:method=>"post"}
 	%textarea{:name=>"text"}
 	%br
 	%button{:type=>"submit"} Add Question
-	
+
 %a{:href=>"/logout"} Logout!
