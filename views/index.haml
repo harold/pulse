@@ -17,12 +17,10 @@
 			.graph{:id=>"graph-q#{q.id}", :title=>'Click for detailed view'}<
 				= @values[q.id].map{ |p| p.join(":") }.join(",")
 
-%p
-	%button#manage Manage Questions
-
 %form.manage-questions#add-question(action="/addquestion" method="post")
 	%textarea{:name=>"text"}
 	%br
 	%button{:type=>"submit"} Add Question
 
-
+%p
+	%button#manage Manage Questions
