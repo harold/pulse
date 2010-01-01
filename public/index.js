@@ -24,7 +24,7 @@ jQuery(function($){
 	
 	$('#manage').click(function(){
 		window.managingQuestions = !window.managingQuestions;
-		$(this).html( window.managingQuestions ? 'Answer Questions' : 'Manage Questions' );
+		$(this).html( window.managingQuestions ? 'Done Managing' : 'Manage Questions' );
 		$('.manage-questions').toggle(window.managingQuestions);
 		$('.answer-radios').toggle(!window.managingQuestions);
 		$('.graph').toggle(!window.managingQuestions);
@@ -46,5 +46,14 @@ jQuery(function($){
 		var theNowHiddenFlag = theQuestion.hasClass('hidden');
 		var theAction = theNowHiddenFlag ? 'hide' : 'show';
 		$.post('/'+theAction+'/'+theQuestion.attr('id'),function(){theUpdateButtonForQuestion(theQuestion);});
+	});
+	
+	$('#add-question').submit(function(){
+		var theQuestion = this.elements.text;
+		theQuestion.value = theQuestion.value.replace(/^\s+|\s+$/g,'');
+		if ( !theQuestion.value ){
+			alert( "I think you forgot to type the text of the question." );
+			return false;
+		}
 	});
 });
