@@ -3,9 +3,11 @@ class Answer < Sequel::Model
 	UPDATE_WINDOW = 60 * 1
 	many_to_one :question
 
-	def before_create
-		similar = self.class.filter( :user_id=>self.user_id, :question_id=>self.question_id )
-		similar.filter( 'epoch >= ?', self.epoch - UPDATE_WINDOW ).delete
-		super
+	def self.update_or_create( values, update_window=UPDATE_WINDOW )
+		# TODO: Instead of deleting and re-adding a new record, is there any good reason to perhaps actually update the last record(s)?
+		similar = filter( :user_id=>values[:user_id], :question_id=>values[:question_id] )
+		recent  = similar.filter( 'epoch >= ?', values[:epoch] - UPDATE_WINDOW )
+		recent.delete
+		self.create( values )
 	end
 end
