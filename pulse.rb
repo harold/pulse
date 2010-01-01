@@ -8,6 +8,7 @@ require 'rack-flash'
 require 'logger'
 
 enable :sessions
+set :haml, {:format => :html4 }
 use Rack::Flash
 
 COOKIE_NAME = "pulse-login"
@@ -80,11 +81,12 @@ get '/signup/?' do
 end
 
 get '/shared.css' do
+	content_type 'text/css', :charset => 'utf-8'
 	sass :shared
 end
 
 get '/?' do
-	@questions = @user.visible_questions
+	@questions = Question.eager(:answers,:question_prefs).all
 	@values = {}
 	@questions.each{ |q| @values[q.pk] = q.timestamped_answers(@user.pk) }
 	@custom_js = "/index.js"
@@ -110,29 +112,28 @@ post '/answer/?' do
 end
 
 post '/detaildata/?' do
-	question_id = params[:question_id].to_i
+	question_id = params[:question_id][/\d+/].to_i
 	answers = Question[question_id].timestamped_answers(@user.pk)
 	
 	"{values:#{answers.inspect}}"
 end
 
 get "/detail/:question_id" do
-	question_id = params[:question_id].to_i
+	question_id = params[:question_id][/\d+/].to_i
 	@question = Question[question_id]
 	@custom_js = "/detail.js"
 	haml :detail
 end
 
-# This action is a fallback for the JS-disabled
-get "/hide/:question_id" do
-	question_id = params[:question_id].to_i
+post "/show/:question_id" do
+	question_id = params[:question_id][/\d+/].to_i
 	pref = QuestionPref.find_or_create( :question_id=>question_id, :user_id=>@user.pk )
-	pref.update( :priority=>-1 )
-	redirect '/'
+	pref.update( :priority=>0 )
+	"OK"
 end
 
 post "/hide/:question_id" do
-	question_id = params[:question_id].to_i
+	question_id = params[:question_id][/\d+/].to_i
 	pref = QuestionPref.find_or_create( :question_id=>question_id, :user_id=>@user.pk )
 	pref.update( :priority=>-1 )
 	"OK"

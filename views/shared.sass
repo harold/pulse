@@ -6,12 +6,18 @@ body
 h1, h2
 	margin: 0.5em 0
 	border-bottom: solid 1px #ddd
-	
+
+.question
+	margin: 1em 0
+
 .question-text
-	margin-bottom: 0
+	margin: 0
 	
 .answer-radios
 	margin: 0
+
+.graph
+	cursor: pointer
 
 #user-id
 	position: absolute
@@ -21,4 +27,17 @@ h1, h2
 #flot-graph
 	width: 400px
 	height: 225px
-	
+
+.manage-questions
+	display: none
+
+.hidden
+	display: none
+	text-decoration: line-through
+	color: #999
+
+.hidden .manage-questions
+	position: relative
+	z-index: 1
+	text-decoration: none
+	color: inherit
