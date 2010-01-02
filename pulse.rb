@@ -5,7 +5,6 @@ require 'sass'
 require 'sequel'
 require 'digest/sha1'
 require 'rack-flash'
-require 'logger'
 
 enable :sessions
 set :haml, {:format => :html4 }
@@ -15,10 +14,14 @@ COOKIE_NAME = "pulse-login"
 
 configure do
 	DB = Sequel.connect( ENV['DATABASE_URL'] || 'sqlite://pulse.db' )
-	#DB.logger = Logger.new STDOUT
 	require "model/user"
 	require "model/question"
 	require "model/answer"
+end
+
+configure :development do
+	require 'logger'
+	DB.logger = Logger.new STDOUT
 end
 
 before do
